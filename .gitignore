@@ -1,0 +1,130 @@
+# Gradle
+.gradle/
+build/
+*/build/
+gradle-app.setting
+
+# Android
+local.properties
+*.iml
+*.hprof
+.cxx/
+*.keystore
+!debug.keystore
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+gen/
+
+# Android Studio
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+.cxx/
+*.keystore
+!debug.keystore
+
+# macOS
+.DS_Store
+*.pem
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+bin/
+gen/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Kotlin
+*.ktm
+*.class
+
+# Build outputs
+build/
+*/build/
+out/
+*/out/
+
+# Gradle
+.gradle/
+
+# Android Gradle Plugin
+*.keystore
+!debug.keystore
+
+# Local configuration files
+local.properties
+
+# Generated files
+bin/
+gen/
+out/
+*/bin/
+*/gen/
+*/out/
+
+# Intermediate files
+intermediates/
+*/intermediates/
+
+# Test reports
+reports/
+*/reports/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 儿童友好明亮色彩 -->
+    <color name="sky_blue">#FF4FC3F7</color>
+    <color name="light_blue">#FF81D4FA</color>
+    <color name="coral_pink">#FFFF8A80</color>
+    <color name="soft_pink">#FFF48FB1</color>
+    <color name="sunny_yellow">#FFFFD54F</color>
+    <color name="mint_green">#FF81C784</color>
+    <color name="soft_orange">#FFFFB74D</color>
+    <color name="lavender">#FFB39DDB</color>
+    <color name="success_green">#FF69F0AE</color>
+    <color name="text_dark">#FF37474F</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

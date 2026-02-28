@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">快递管家</string>
+
+    <!-- MainActivity -->
+    <string name="title_my_packages">快递管家</string>
+    <string name="subtitle_manage_packages">取件码一目了然</string>
+    <string name="confirm_tip">确认提示</string>
+    <string name="refresh">刷新</string>
+
+    <!-- PackageList -->
+    <string name="filter_all">📋 全部</string>
+    <string name="filter_pending">⏳ 未取</string>
+    <string name="filter_picked_up">✅ 已取</string>
+    <string name="empty_state_no_packages">暂无快递信息</string>
+    <string name="empty_state_refresh_hint">下拉刷新同步短信</string>
+
+    <!-- PackageItem -->
+    <string name="dialog_title_confirm">⚠️ 确认操作</string>
+    <string name="dialog_message_mark_picked_up">✅ 确定要将这个快递标记为已取件吗？</string>
+    <string name="dialog_message_mark_pending">🔄 确定要将这个快递重置为未取件吗？</string>
+    <string name="dialog_button_confirm">👌 确定</string>
+    <string name="dialog_button_cancel">❌ 取消</string>
+    <string name="mark_as_picked_up">📋 标记为已取件</string>
+    <string name="pickup_code">取件码: %1$s</string>
+    <string name="locker">📦 快递柜</string>
+    <string name="delivery_time">🕒 送达时间</string>
+    <string name="weekday">📅 星期</string>
+    <string name="picked_up_time">✅ 已取件 · %1$s</string>
+    <string name="reset_to_pending">🔄 重置为未取件</string>
+    <string name="locker_number">%1$s号</string>
+</resources>
