@@ -13,6 +13,8 @@
 - 🎨 **现代化界面**：使用 Jetpack Compose 构建精美的用户界面
 - 💾 **本地存储**：使用 Room 数据库持久化存储快递信息
 
+![应用首页截图](screenshots/Screenshot-Home.png)
+
 ## 技术栈
 
 - **语言**：Kotlin

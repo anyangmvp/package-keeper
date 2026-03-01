@@ -6,9 +6,9 @@ import java.util.regex.Pattern
 
 class SmsParser {
     companion object {
-        private val PICKUP_CODE_PATTERN = Pattern.compile("取件码\\s*(\\d{5,})")
+        private val PICKUP_CODE_PATTERN = Pattern.compile("(?:取件码|提货码)\\s*(\\d{5,})")
         private val LOCKER_PATTERN = Pattern.compile("(\\d+)号(快递柜|柜)")
-        private val LOCATION_PATTERN = Pattern.compile("(?:已到|在)([^，。]+?)(?:，|。|请)")
+        private val LOCATION_PATTERN = Pattern.compile("(?:已到|到)([^，。]+?)(?:，|。|请)")
         private val SENDER_PATTERN = Pattern.compile("【([^】]+)】")
     }
 
@@ -50,7 +50,7 @@ class SmsParser {
 
     fun isPackageSms(message: String): Boolean {
         return PICKUP_CODE_PATTERN.matcher(message).find() ||
-                message.contains("递管家") || message.contains("取件码") ||
+                message.contains("递管家") || message.contains("取件码") || message.contains("提货码") ||
                (message.contains("快递") && message.contains("到"))
     }
 }
