@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -15,28 +16,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import anyang.mypackages.ui.theme.*
 
-/**
- * 温馨搜索栏 - 圆润可爱风格
- */
 @Composable
-fun WarmSearchBar(
+fun SearchBar(
     searchText: String,
     onSearchChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "搜索取件码、柜号..."
+    placeholder: String = "搜索柜号、位置..."
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color.White)
-            .padding(horizontal = 16.dp),
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(SoftGray)
+            .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
@@ -46,7 +44,7 @@ fun WarmSearchBar(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "搜索",
-                tint = TextLight,
+                tint = TextTertiary,
                 modifier = Modifier.size(20.dp)
             )
 
@@ -57,16 +55,17 @@ fun WarmSearchBar(
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextLight
+                        color = TextTertiary
                     )
                 }
                 BasicTextField(
                     value = searchText,
                     onValueChange = onSearchChange,
                     textStyle = TextStyle(
-                        color = TextDark,
+                        color = TextPrimary,
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize
                     ),
+                    cursorBrush = SolidColor(ProfessionalBlue),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -80,7 +79,7 @@ fun WarmSearchBar(
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "清除",
-                        tint = TextLight,
+                        tint = TextTertiary,
                         modifier = Modifier.size(18.dp)
                     )
                 }

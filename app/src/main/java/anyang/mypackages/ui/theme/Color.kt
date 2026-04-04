@@ -3,48 +3,58 @@ package anyang.mypackages.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // ============================================
-// 温馨治愈主题 (Warm & Happy Theme)
-// 让取快递变成一件开心的事！
+// 专业现代主题 (Professional Modern Theme)
+// 简洁、高效、专业的快递管理体验
 // ============================================
 
-// 主背景色 - 温暖的奶油色
-val WarmCream = Color(0xFFFEF9F3)
-val SoftCream = Color(0xFFFFF5E6)
-val LightCream = Color(0xFFFFFBF5)
+// 主背景色 - 冷色调浅灰白
+val CoolWhite = Color(0xFFF8FAFC)
+val SoftGray = Color(0xFFF1F5F9)
+val LightGray = Color(0xFFE2E8F0)
 
-// 温暖的渐变色
-val SunrisePink = Color(0xFFFFE4E1)
-val SunsetOrange = Color(0xFFFFE4C4)
-val SkyBlue = Color(0xFFE0F4FF)
-val MintGreen = Color(0xFFE0F7E0)
-val Lavender = Color(0xFFF0E6FF)
+// 主色调 - 专业蓝色系
+val ProfessionalBlue = Color(0xFF2563EB)
+val DeepBlue = Color(0xFF1E40AF)
+val SkyBlue = Color(0xFF0EA5E9)
+val LightBlue = Color(0xFFDBEAFE)
 
-// 主色调 - 活力的糖果色
-val HappyPink = Color(0xFFFF8FAB)
-val HappyCoral = Color(0xFFFF9A8B)
-val HappyBlue = Color(0xFF7EC8E3)
-val HappyGreen = Color(0xFF90EE90)
-val HappyYellow = Color(0xFFFFE066)
-val HappyPurple = Color(0xFFDDA0DD)
+// 辅助色 - 现代青绿色
+val ModernTeal = Color(0xFF0891B2)
+val TealLight = Color(0xFFECFEFF)
 
-// 强调色 - 温暖的橙色和粉色
-val WarmOrange = Color(0xFFFFB347)
-val WarmCoral = Color(0xFFFF7F6B)
-val WarmRose = Color(0xFFFF6B9D)
+// 强调色 - 活力橙色
+val VibrantOrange = Color(0xFFF97316)
+val WarmOrange = Color(0xFFFB923C)
+val OrangeLight = Color(0xFFFED7AA)
 
 // 状态色
-val StatusPending = Color(0xFFFFB347)
-val StatusPickedUp = Color(0xFF90EE90)
-val StatusNew = Color(0xFFFF6B9D)
+val StatusPending = Color(0xFFF97316)
+val StatusPickedUp = Color(0xFF10B981)
+val StatusNew = Color(0xFF2563EB)
 
-// 文字颜色
-val TextDark = Color(0xFF4A4A4A)
-val TextMedium = Color(0xFF6B6B6B)
-val TextLight = Color(0xFF9B9B9B)
+// 成功/警告/错误色
+val SuccessGreen = Color(0xFF10B981)
+val SuccessLight = Color(0xFFD1FAE5)
+val WarningYellow = Color(0xFFF59E0B)
+val WarningLight = Color(0xFFFEF3C7)
+val ErrorRed = Color(0xFFEF4444)
+val ErrorLight = Color(0xFFFEE2E2)
+
+// 文字颜色 - 高对比度
+val TextPrimary = Color(0xFF1E293B)
+val TextSecondary = Color(0xFF475569)
+val TextTertiary = Color(0xFF94A3B8)
+val TextInverse = Color(0xFFFFFFFF)
 
 // 卡片背景色
 val CardBackground = Color(0xFFFFFFFF)
-val CardBackgroundSoft = Color(0xFFFDF8F3)
+val CardBorder = Color(0xFFE2E8F0)
 
 // 阴影颜色
-val ShadowSoft = Color(0x1A000000)
+val ShadowLight = Color(0x0F000000)
+val ShadowMedium = Color(0x1A000000)
+
+// 渐变组合
+val HeaderGradientStart = Color(0xFF1E40AF)
+val HeaderGradientEnd = Color(0xFF2563EB)
+val CardGradientTeal = Color(0xFF0891B2)

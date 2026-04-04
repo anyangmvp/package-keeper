@@ -11,30 +11,27 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import anyang.mypackages.ui.components.WarmPackageList
-import anyang.mypackages.ui.components.WarmSearchBar
+import anyang.mypackages.ui.components.PackageList
+import anyang.mypackages.ui.components.SearchBar
 import anyang.mypackages.ui.theme.*
 import anyang.mypackages.viewmodel.FilterStatus
 import anyang.mypackages.viewmodel.PackageViewModel
@@ -56,7 +53,7 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermission()
         setContent {
             MyPackagesTheme {
-                WarmPackageScreen(viewModel)
+                PackageScreen(viewModel)
             }
         }
     }
@@ -76,7 +73,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WarmPackageScreen(viewModel: PackageViewModel) {
+fun PackageScreen(viewModel: PackageViewModel) {
     val packages by viewModel.packages.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val filterStatus by rememberUpdatedState(newValue = viewModel.filterStatus.value)
@@ -107,7 +104,7 @@ fun WarmPackageScreen(viewModel: PackageViewModel) {
             FilterStatus.PENDING -> pkg.status == anyang.mypackages.data.PackageStatus.PENDING
             FilterStatus.PICKED_UP -> pkg.status == anyang.mypackages.data.PackageStatus.PICKED_UP
         }
-        val matchesSearch = searchText.isBlank() || 
+        val matchesSearch = searchText.isBlank() ||
             pkg.pickupCode.contains(searchText, ignoreCase = true) ||
             pkg.lockerNumber.contains(searchText, ignoreCase = true) ||
             pkg.location.contains(searchText, ignoreCase = true)
@@ -117,27 +114,26 @@ fun WarmPackageScreen(viewModel: PackageViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WarmCream)
+            .background(CoolWhite)
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // 温馨头部
-            WarmHeader(
+            Header(
                 pendingCount = pendingCount,
                 isLoading = isLoading,
-                onRefresh = { viewModel.syncSms() }
+                onRefresh = { viewModel.syncSms() },
+                confirmBeforeSwipe = confirmBeforeSwipe,
+                onToggleConfirm = { viewModel.toggleConfirmBeforeSwipe() }
             )
 
-            // 搜索栏
-            WarmSearchBar(
+            SearchBar(
                 searchText = searchText,
                 onSearchChange = { viewModel.searchText.value = it },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
 
-            // 过滤标签
-            WarmFilterTabs(
+            FilterTabs(
                 currentFilter = filterStatus,
                 onFilterChange = { viewModel.updateFilterStatus(it) },
                 counts = Triple(totalCount, pendingCount, pickedUpCount),
@@ -146,8 +142,7 @@ fun WarmPackageScreen(viewModel: PackageViewModel) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 包裹列表
-            WarmPackageList(
+            PackageList(
                 packages = filteredPackages,
                 isLoading = isLoading,
                 confirmBeforeSwipe = confirmBeforeSwipe,
@@ -157,29 +152,16 @@ fun WarmPackageScreen(viewModel: PackageViewModel) {
                 modifier = Modifier.fillMaxSize()
             )
         }
-
-        // 设置按钮
-        WarmSettingsButton(
-            confirmBeforeSwipe = confirmBeforeSwipe,
-            onToggleConfirm = { viewModel.toggleConfirmBeforeSwipe() },
-            modifier = Modifier.align(Alignment.BottomEnd)
-        )
     }
 }
 
-/**
- * 辅助数据类
- */
-data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
-
-/**
- * 温馨头部 - 有惊喜感的问候
- */
 @Composable
-fun WarmHeader(
+fun Header(
     pendingCount: Int,
     isLoading: Boolean,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    confirmBeforeSwipe: Boolean,
+    onToggleConfirm: () -> Unit
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "rotation")
     val rotation by infiniteTransition.animateFloat(
@@ -192,12 +174,11 @@ fun WarmHeader(
         label = "rotation"
     )
 
-    // 根据待取件数量显示不同的问候语
     val greeting = when {
-        pendingCount == 0 -> "今天没有包裹，轻松一天~ ☀️"
-        pendingCount == 1 -> "有1个包裹在等你哦！🎁"
-        pendingCount <= 3 -> "有${pendingCount}个包裹等你来取！🎉"
-        else -> "哇！有${pendingCount}个包裹！📦"
+        pendingCount == 0 -> "全部取完，轻松一天！"
+        pendingCount == 1 -> "还有1个快递待取"
+        pendingCount <= 3 -> "有${pendingCount}个快递待取"
+        else -> "有${pendingCount}个快递待取"
     }
 
     Box(
@@ -205,78 +186,120 @@ fun WarmHeader(
             .fillMaxWidth()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        SunrisePink.copy(alpha = 0.6f),
-                        WarmCream
-                    )
+                    colors = listOf(HeaderGradientStart, HeaderGradientEnd)
                 )
             )
             .padding(horizontal = 20.dp)
-            .padding(top = 48.dp, bottom = 16.dp)
+            .padding(top = 48.dp, bottom = 20.dp)
     ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Inbox,
+                        contentDescription = null,
+                        tint = TextInverse.copy(alpha = 0.9f),
+                        modifier = Modifier.size(24.dp)
+                    )
                     Text(
-                        text = "${getTimeGreeting()}!",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = TextDark,
+                        text = "${getTimeGreeting()}！",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = TextInverse,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = greeting,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextMedium
-                    )
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = greeting,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextInverse.copy(alpha = 0.85f)
+                )
+            }
 
-                // 可爱的刷新按钮
-                Surface(
-                    onClick = onRefresh,
-                    shape = CircleShape,
-                    color = Color.White,
-                    shadowElevation = 4.dp,
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
+            var showSettingsMenu by remember { mutableStateOf(false) }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box {
+                    FilledIconButton(
+                        onClick = { showSettingsMenu = !showSettingsMenu },
+                        shape = CircleShape,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = if (showSettingsMenu) ProfessionalBlue else Color.White,
+                            contentColor = if (showSettingsMenu) TextInverse else ProfessionalBlue
+                        ),
+                        modifier = Modifier.size(40.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "刷新",
-                            tint = HappyPink,
-                            modifier = Modifier
-                                .size(20.dp)
-                                .rotate(if (isLoading) rotation else 0f)
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "设置",
+                            modifier = Modifier.size(20.dp)
                         )
                     }
+
+                    DropdownMenu(
+                        expanded = showSettingsMenu,
+                        onDismissRequest = { showSettingsMenu = false },
+                        modifier = Modifier.background(CardBackground)
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Text("确认提示")
+                                    Switch(
+                                        checked = confirmBeforeSwipe,
+                                        onCheckedChange = { onToggleConfirm() },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = TextInverse,
+                                            checkedTrackColor = ProfessionalBlue,
+                                            uncheckedThumbColor = TextTertiary,
+                                            uncheckedTrackColor = LightGray
+                                        )
+                                    )
+                                }
+                            },
+                            onClick = { },
+                            enabled = false
+                        )
+                    }
+                }
+
+                FilledIconButton(
+                    onClick = onRefresh,
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = Color.White,
+                        contentColor = ProfessionalBlue
+                    ),
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "刷新",
+                        modifier = Modifier
+                            .size(20.dp)
+                            .rotate(if (isLoading) rotation else 0f)
+                    )
                 }
             }
         }
     }
 }
 
-/**
- * 根据时间返回问候语
- */
-fun getTimeGreeting(): String {
-    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-    return when {
-        hour < 11 -> "早安"
-        hour < 14 -> "午安"
-        hour < 18 -> "下午好"
-        else -> "晚上好"
-    }
-}
-
-/**
- * 温馨过滤标签
- */
 @Composable
-fun WarmFilterTabs(
+fun FilterTabs(
     currentFilter: FilterStatus,
     onFilterChange: (FilterStatus) -> Unit,
     counts: Triple<Int, Int, Int>,
@@ -290,91 +313,61 @@ fun WarmFilterTabs(
 
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         filters.forEach { (filter, label, count) ->
             val isSelected = currentFilter == filter
-            WarmFilterChip(
-                label = label,
-                count = count,
-                isSelected = isSelected,
+            FilterChip(
+                selected = isSelected,
                 onClick = { onFilterChange(filter) },
+                label = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (isSelected) TextInverse else TextSecondary
+                        )
+                        if (count > 0) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = if (isSelected) TextInverse.copy(alpha = 0.25f) else ProfessionalBlue.copy(alpha = 0.12f)
+                            ) {
+                                Text(
+                                    text = count.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isSelected) TextInverse else ProfessionalBlue,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = ProfessionalBlue,
+                    selectedLabelColor = TextInverse,
+                    containerColor = CardBackground,
+                    labelColor = TextSecondary
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    borderColor = CardBorder,
+                    selectedBorderColor = ProfessionalBlue,
+                    enabled = true,
+                    selected = isSelected
+                ),
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
-/**
- * 温馨过滤芯片 - 圆润可爱
- */
 @Composable
-fun WarmFilterChip(
-    label: String,
-    count: Int,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val backgroundColor = if (isSelected) {
-        HappyPink
-    } else {
-        Color.White
-    }
-
-    val contentColor = if (isSelected) {
-        Color.White
-    } else {
-        TextDark
-    }
-
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = backgroundColor,
-        shadowElevation = if (isSelected) 4.dp else 2.dp,
-        modifier = modifier
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = contentColor,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                )
-                if (count > 0) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) Color.White.copy(alpha = 0.3f) else HappyPink.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = count.toString(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (isSelected) Color.White else HappyPink,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * 温馨设置按钮
- */
-@Composable
-fun WarmSettingsButton(
+fun SettingsFab(
     confirmBeforeSwipe: Boolean,
     onToggleConfirm: () -> Unit,
     modifier: Modifier = Modifier
@@ -390,44 +383,50 @@ fun WarmSettingsButton(
             exit = fadeOut() + slideOutVertically { it }
         ) {
             Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBackground),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 modifier = Modifier
-                    .padding(bottom = 72.dp)
+                    .padding(bottom = 64.dp)
                     .align(Alignment.BottomEnd)
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "设置",
+                        text = "设置选项",
                         style = MaterialTheme.typography.titleSmall,
-                        color = TextDark,
-                        fontWeight = FontWeight.Bold
+                        color = TextPrimary,
+                        fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "确认提示",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = TextDark
-                            )
-                            Text(
-                                text = "取件前弹出确认",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = TextLight
-                            )
-                        }
-                        WarmSwitch(
+                        Text(
+                            text = "确认提示",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextPrimary
+                        )
+                        Switch(
                             checked = confirmBeforeSwipe,
-                            onCheckedChange = { onToggleConfirm() }
+                            onCheckedChange = { onToggleConfirm() },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = TextInverse,
+                                checkedTrackColor = ProfessionalBlue,
+                                uncheckedThumbColor = TextTertiary,
+                                uncheckedTrackColor = LightGray
+                            )
                         )
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "取件前弹出确认对话框",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TextTertiary
+                    )
                 }
             }
         }
@@ -435,53 +434,30 @@ fun WarmSettingsButton(
         FloatingActionButton(
             onClick = { showMenu = !showMenu },
             shape = CircleShape,
-            containerColor = Color.White,
-            contentColor = HappyPink,
-            elevation = FloatingActionButtonDefaults.elevation(6.dp),
-            modifier = Modifier.align(Alignment.BottomEnd)
+            containerColor = if (showMenu) ProfessionalBlue else CardBackground,
+            contentColor = if (showMenu) TextInverse else ProfessionalBlue,
+            elevation = FloatingActionButtonDefaults.elevation(4.dp),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(40.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Settings,
+                imageVector = if (showMenu) Icons.Default.CheckCircle else Icons.Default.Settings,
                 contentDescription = "设置",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
     }
 }
 
-/**
- * 温馨开关
- */
-@Composable
-fun WarmSwitch(
-    checked: Boolean,
-    onCheckedChange: () -> Unit
-) {
-    val thumbPosition by animateFloatAsState(
-        targetValue = if (checked) 1f else 0f,
-        animationSpec = tween(200),
-        label = "position"
-    )
-
-    Box(
-        modifier = Modifier
-            .width(48.dp)
-            .height(26.dp)
-            .clip(RoundedCornerShape(13.dp))
-            .background(
-                if (checked) HappyPink else Color(0xFFE0E0E0)
-            )
-            .clickable { onCheckedChange() },
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(3.dp)
-                .size(20.dp)
-                .graphicsLayer {
-                    translationX = thumbPosition * 22.dp.toPx()
-                }
-                .background(Color.White, CircleShape)
-        )
+fun getTimeGreeting(): String {
+    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+    return when {
+        hour < 6 -> "凌晨好"
+        hour < 11 -> "早上好"
+        hour < 14 -> "中午好"
+        hour < 18 -> "下午好"
+        hour < 22 -> "晚上好"
+        else -> "夜深了"
     }
 }
