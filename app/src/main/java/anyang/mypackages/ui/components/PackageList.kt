@@ -436,25 +436,37 @@ fun PackageItem(
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
             icon = {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = VibrantOrange,
-                    modifier = Modifier.size(28.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            VibrantOrange.copy(alpha = 0.1f),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = VibrantOrange,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             },
             title = {
                 Text(
                     text = "恢复未取件",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
                 )
             },
             text = {
                 Text(
                     text = "确定要将柜号 ${packageItem.lockerNumber} 的快递恢复为未取件状态吗？",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary
+                    color = TextSecondary,
+                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3
                 )
             },
             confirmButton = {
@@ -464,21 +476,37 @@ fun PackageItem(
                         showResetDialog = false
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = VibrantOrange
+                        containerColor = VibrantOrange,
+                        contentColor = TextInverse
                     ),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
                 ) {
-                    Text("恢复")
+                    Text(
+                        text = "恢复",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showResetDialog = false }
+                    onClick = { showResetDialog = false },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
                 ) {
-                    Text("取消", color = TextSecondary)
+                    Text(
+                        text = "取消",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextSecondary
+                    )
                 }
             },
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(24.dp),
             containerColor = CardBackground
         )
     }
@@ -515,19 +543,35 @@ fun formatDate(timestamp: Long): String {
     val now = Calendar.getInstance()
     val date = Calendar.getInstance().apply { timeInMillis = timestamp }
 
-    val diffDays = now.get(Calendar.DAY_OF_YEAR) - date.get(Calendar.DAY_OF_YEAR) +
-            (now.get(Calendar.YEAR) - date.get(Calendar.YEAR)) * 365
+    // 重置时分秒，只比较日期
+    now.set(Calendar.HOUR_OF_DAY, 0)
+    now.set(Calendar.MINUTE, 0)
+    now.set(Calendar.SECOND, 0)
+    now.set(Calendar.MILLISECOND, 0)
+
+    val targetDate = Calendar.getInstance().apply {
+        timeInMillis = timestamp
+        set(Calendar.HOUR_OF_DAY, 0)
+        set(Calendar.MINUTE, 0)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+
+    val diffMillis = now.timeInMillis - targetDate.timeInMillis
+    val diffDays = (diffMillis / (24 * 60 * 60 * 1000)).toInt()
+
+    val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
 
     return when {
-        diffDays == 0 -> "今天"
-        diffDays == 1 -> "昨天"
+        diffDays == 0 -> "今天 $timeStr"
+        diffDays == 1 -> "昨天 $timeStr"
         diffDays < 7 -> {
             val weekdays = arrayOf("周日", "周一", "周二", "周三", "周四", "周五", "周六")
-            weekdays[date.get(Calendar.DAY_OF_WEEK) - 1]
+            "${weekdays[date.get(Calendar.DAY_OF_WEEK) - 1]} $timeStr"
         }
         else -> {
             val sdf = SimpleDateFormat("MM月dd日", Locale.getDefault())
-            sdf.format(Date(timestamp))
+            "${sdf.format(Date(timestamp))} $timeStr"
         }
     }
 }
