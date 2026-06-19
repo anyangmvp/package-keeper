@@ -14,7 +14,8 @@ data class PackageEntity(
     val messageContent: String,
     val receiveTime: Long,
     val status: PackageStatus = PackageStatus.PENDING,
-    val pickupTime: Long? = null
+    val pickupTime: Long? = null,
+    val platform: String? = null
 )
 
 enum class PackageStatus {

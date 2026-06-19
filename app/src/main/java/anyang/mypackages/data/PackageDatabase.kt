@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [PackageEntity::class], version = 1)
+@Database(entities = [PackageEntity::class], version = 2)
 abstract class PackageDatabase : RoomDatabase() {
     abstract fun packageDao(): PackageDao
 

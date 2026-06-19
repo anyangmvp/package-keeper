@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import anyang.mypackages.R
 import anyang.mypackages.data.PackageEntity
 import anyang.mypackages.data.PackageStatus
@@ -227,15 +228,30 @@ fun PackageItem(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.weight(1f)
                     ) {
+                        // 平台标识（菜鸟驿站特殊显示）
+                        val platformLabel = packageItem.platform
+                        if (!platformLabel.isNullOrBlank()) {
+                            PlatformBadge(
+                                platform = platformLabel,
+                                isPickedUp = isPickedUp
+                            )
+                        }
+
+                        // 柜号/驿站标识
+                        val lockerLabel = if (packageItem.lockerNumber == "驿站") {
+                            "驿站取件"
+                        } else {
+                            "${packageItem.lockerNumber}号柜"
+                        }
                         Surface(
                             shape = RoundedCornerShape(8.dp),
                             color = if (isPickedUp) SuccessGreen.copy(alpha = 0.12f) else ProfessionalBlue.copy(alpha = 0.1f)
                         ) {
                             Text(
-                                text = "${packageItem.lockerNumber}号柜",
+                                text = lockerLabel,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = if (isPickedUp) SuccessGreen else ProfessionalBlue,
                                 fontWeight = FontWeight.SemiBold,
@@ -387,8 +403,18 @@ fun PackageItem(
             },
             text = {
                 Column {
+                    if (!packageItem.platform.isNullOrBlank()) {
+                        Text(
+                            text = "来源：${packageItem.platform}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    val lockerText = if (packageItem.lockerNumber == "驿站") "驿站取件" else "${packageItem.lockerNumber}号柜"
                     Text(
-                        text = "柜号：${packageItem.lockerNumber}号",
+                        text = "柜号：$lockerText",
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondary
                     )
@@ -462,8 +488,9 @@ fun PackageItem(
                 )
             },
             text = {
+                val lockerDesc = if (packageItem.lockerNumber == "驿站") "驿站" else "${packageItem.lockerNumber}号柜"
                 Text(
-                    text = "确定要将柜号 ${packageItem.lockerNumber} 的快递恢复为未取件状态吗？",
+                    text = "确定要将${lockerDesc}的快递恢复为未取件状态吗？",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextSecondary,
                     lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3
@@ -509,6 +536,44 @@ fun PackageItem(
             shape = RoundedCornerShape(24.dp),
             containerColor = CardBackground
         )
+    }
+}
+
+@Composable
+fun PlatformBadge(platform: String, isPickedUp: Boolean) {
+    val (bgColor, textColor) = when {
+        platform.contains("菜鸟") -> Pair(OrangeLight, VibrantOrange)
+        platform.contains("递管家") -> Pair(LightBlue.copy(alpha = 0.5f), ProfessionalBlue)
+        platform.contains("顺丰") -> Pair(SuccessLight, SuccessGreen)
+        else -> Pair(LightBlue.copy(alpha = 0.5f), ProfessionalBlue)
+    }
+
+    Surface(
+        shape = RoundedCornerShape(6.dp),
+        color = if (isPickedUp) bgColor.copy(alpha = 0.5f) else bgColor
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            // 菜鸟驿站显示小圆点标记
+            if (platform.contains("菜鸟")) {
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(VibrantOrange)
+                )
+            }
+            Text(
+                text = platform.replace("速运", ""),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isPickedUp) textColor.copy(alpha = 0.6f) else textColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = if (platform.contains("菜鸟")) 11.sp else 10.sp
+            )
+        }
     }
 }
 
