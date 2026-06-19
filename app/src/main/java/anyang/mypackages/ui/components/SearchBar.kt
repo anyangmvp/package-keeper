@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,46 +25,47 @@ fun SearchBar(
     searchText: String,
     onSearchChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "搜索柜号、位置..."
+    placeholder: String = "搜索柜号、位置、取件码..."
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(SoftGray)
-            .padding(horizontal = 14.dp),
+            .height(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(FillTertiary)
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "搜索",
-                tint = TextTertiary,
-                modifier = Modifier.size(20.dp)
+                tint = TertiaryLabel,
+                modifier = Modifier.size(16.dp)
             )
 
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
+            Spacer(Modifier.width(6.dp))
+
+            Box(modifier = Modifier.weight(1f)) {
                 if (searchText.isEmpty()) {
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextTertiary
+                        color = TertiaryLabel,
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize
                     )
                 }
                 BasicTextField(
                     value = searchText,
                     onValueChange = onSearchChange,
                     textStyle = TextStyle(
-                        color = TextPrimary,
+                        color = Label,
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize
                     ),
-                    cursorBrush = SolidColor(ProfessionalBlue),
+                    cursorBrush = SolidColor(SystemBlue),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -74,13 +74,13 @@ fun SearchBar(
             if (searchText.isNotEmpty()) {
                 IconButton(
                     onClick = { onSearchChange("") },
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "清除",
-                        tint = TextTertiary,
-                        modifier = Modifier.size(18.dp)
+                        tint = TertiaryLabel,
+                        modifier = Modifier.size(14.dp)
                     )
                 }
             }

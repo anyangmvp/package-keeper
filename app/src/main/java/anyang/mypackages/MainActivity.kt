@@ -11,23 +11,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import anyang.mypackages.ui.components.PackageList
@@ -111,36 +113,36 @@ fun PackageScreen(viewModel: PackageViewModel) {
         matchesStatus && matchesSearch
     }.sortedByDescending { it.receiveTime }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CoolWhite)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Header(
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = SystemGroupedBackground,
+        topBar = {
+            IosHeader(
                 pendingCount = pendingCount,
                 isLoading = isLoading,
                 onRefresh = { viewModel.syncSms() },
                 confirmBeforeSwipe = confirmBeforeSwipe,
                 onToggleConfirm = { viewModel.toggleConfirmBeforeSwipe() }
             )
-
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
             SearchBar(
                 searchText = searchText,
                 onSearchChange = { viewModel.searchText.value = it },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                modifier = Modifier.padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 6.dp)
             )
 
-            FilterTabs(
+            IosSegmentedControl(
                 currentFilter = filterStatus,
                 onFilterChange = { viewModel.updateFilterStatus(it) },
                 counts = Triple(totalCount, pendingCount, pickedUpCount),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             PackageList(
                 packages = filteredPackages,
@@ -149,14 +151,17 @@ fun PackageScreen(viewModel: PackageViewModel) {
                 onRefresh = { viewModel.syncSms() },
                 onPickedUp = { viewModel.markAsPickedUp(it) },
                 onResetToPending = { viewModel.resetToPending(it) },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 4.dp)
             )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Header(
+fun IosHeader(
     pendingCount: Int,
     isLoading: Boolean,
     onRefresh: () -> Unit,
@@ -168,7 +173,7 @@ fun Header(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
+            animation = tween(800, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "rotation"
@@ -176,130 +181,64 @@ fun Header(
 
     val greeting = when {
         pendingCount == 0 -> "全部取完，轻松一天！"
-        pendingCount == 1 -> "还有1个快递待取"
-        pendingCount <= 3 -> "有${pendingCount}个快递待取"
-        else -> "有${pendingCount}个快递待取"
+        pendingCount == 1 -> "还有 1 个快递待取"
+        else -> "还有 ${pendingCount} 个快递待取"
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(HeaderGradientStart, HeaderGradientEnd)
+    TopAppBar(
+        title = {
+            Column {
+                Text(
+                    text = "${getTimeGreeting()}，",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = SecondaryLabel
                 )
-            )
-            .padding(horizontal = 20.dp)
-            .padding(top = 48.dp, bottom = 20.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Inbox,
-                        contentDescription = null,
-                        tint = TextInverse.copy(alpha = 0.9f),
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = "${getTimeGreeting()}！",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = TextInverse,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = greeting,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextInverse.copy(alpha = 0.85f)
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Label
                 )
             }
-
-            var showSettingsMenu by remember { mutableStateOf(false) }
-
+        },
+        actions = {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box {
-                    FilledIconButton(
-                        onClick = { showSettingsMenu = !showSettingsMenu },
-                        shape = CircleShape,
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = if (showSettingsMenu) ProfessionalBlue else Color.White,
-                            contentColor = if (showSettingsMenu) TextInverse else ProfessionalBlue
-                        ),
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "设置",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                Switch(
+                    checked = confirmBeforeSwipe,
+                    onCheckedChange = { onToggleConfirm() },
+                    modifier = Modifier.scale(0.65f),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = SystemGreen,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = SystemGray4
+                    )
+                )
 
-                    DropdownMenu(
-                        expanded = showSettingsMenu,
-                        onDismissRequest = { showSettingsMenu = false },
-                        modifier = Modifier.background(CardBackground)
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Text("确认提示")
-                                    Switch(
-                                        checked = confirmBeforeSwipe,
-                                        onCheckedChange = { onToggleConfirm() },
-                                        colors = SwitchDefaults.colors(
-                                            checkedThumbColor = TextInverse,
-                                            checkedTrackColor = ProfessionalBlue,
-                                            uncheckedThumbColor = TextTertiary,
-                                            uncheckedTrackColor = LightGray
-                                        )
-                                    )
-                                }
-                            },
-                            onClick = { },
-                            enabled = false
-                        )
-                    }
-                }
-
-                FilledIconButton(
-                    onClick = onRefresh,
-                    shape = CircleShape,
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = Color.White,
-                        contentColor = ProfessionalBlue
-                    ),
-                    modifier = Modifier.size(40.dp)
-                ) {
+                IconButton(onClick = onRefresh) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "刷新",
+                        tint = SystemBlue,
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(22.dp)
                             .rotate(if (isLoading) rotation else 0f)
                     )
                 }
             }
-        }
-    }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = SystemGroupedBackground,
+            scrolledContainerColor = SystemGroupedBackground
+        )
+    )
 }
 
 @Composable
-fun FilterTabs(
+fun IosSegmentedControl(
     currentFilter: FilterStatus,
     onFilterChange: (FilterStatus) -> Unit,
     counts: Triple<Int, Int, Int>,
@@ -311,141 +250,60 @@ fun FilterTabs(
         Triple(FilterStatus.PICKED_UP, "已取件", counts.third)
     )
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(FillQuaternary)
+            .padding(2.dp)
     ) {
-        filters.forEach { (filter, label, count) ->
-            val isSelected = currentFilter == filter
-            FilterChip(
-                selected = isSelected,
-                onClick = { onFilterChange(filter) },
-                label = {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            filters.forEach { (filter, label, count) ->
+                val isSelected = currentFilter == filter
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(9.dp))
+                        .background(
+                            if (isSelected) SystemBackground else Color.Transparent
+                        )
+                        .then(
+                            if (isSelected) Modifier else Modifier
+                        )
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onFilterChange(filter) }
+                        .padding(vertical = 7.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
                             text = label,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (isSelected) TextInverse else TextSecondary
+                            color = if (isSelected) Label else SecondaryLabel,
+                            fontSize = if (isSelected) 13.sp else 13.sp
                         )
                         if (count > 0) {
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = if (isSelected) TextInverse.copy(alpha = 0.25f) else ProfessionalBlue.copy(alpha = 0.12f)
-                            ) {
-                                Text(
-                                    text = count.toString(),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (isSelected) TextInverse else ProfessionalBlue,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
+                            Text(
+                                text = count.toString(),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isSelected) SecondaryLabel else TertiaryLabel,
+                                fontSize = 12.sp
+                            )
                         }
                     }
-                },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = ProfessionalBlue,
-                    selectedLabelColor = TextInverse,
-                    containerColor = CardBackground,
-                    labelColor = TextSecondary
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    borderColor = CardBorder,
-                    selectedBorderColor = ProfessionalBlue,
-                    enabled = true,
-                    selected = isSelected
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun SettingsFab(
-    confirmBeforeSwipe: Boolean,
-    onToggleConfirm: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var showMenu by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier.padding(16.dp)
-    ) {
-        AnimatedVisibility(
-            visible = showMenu,
-            enter = fadeIn() + slideInVertically { it },
-            exit = fadeOut() + slideOutVertically { it }
-        ) {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = CardBackground),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                modifier = Modifier
-                    .padding(bottom = 64.dp)
-                    .align(Alignment.BottomEnd)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = "设置选项",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = TextPrimary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = "确认提示",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = TextPrimary
-                        )
-                        Switch(
-                            checked = confirmBeforeSwipe,
-                            onCheckedChange = { onToggleConfirm() },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = TextInverse,
-                                checkedTrackColor = ProfessionalBlue,
-                                uncheckedThumbColor = TextTertiary,
-                                uncheckedTrackColor = LightGray
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "取件前弹出确认对话框",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextTertiary
-                    )
                 }
             }
-        }
-
-        FloatingActionButton(
-            onClick = { showMenu = !showMenu },
-            shape = CircleShape,
-            containerColor = if (showMenu) ProfessionalBlue else CardBackground,
-            contentColor = if (showMenu) TextInverse else ProfessionalBlue,
-            elevation = FloatingActionButtonDefaults.elevation(4.dp),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .size(40.dp)
-        ) {
-            Icon(
-                imageVector = if (showMenu) Icons.Default.CheckCircle else Icons.Default.Settings,
-                contentDescription = "设置",
-                modifier = Modifier.size(18.dp)
-            )
         }
     }
 }

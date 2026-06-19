@@ -24,14 +24,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import anyang.mypackages.R
+import androidx.compose.ui.window.Dialog
 import anyang.mypackages.data.PackageEntity
 import anyang.mypackages.data.PackageStatus
 import anyang.mypackages.ui.theme.*
@@ -63,7 +62,7 @@ fun PackageList(
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(
@@ -79,7 +78,7 @@ fun PackageList(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(80.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -88,8 +87,8 @@ fun PackageList(
             refreshing = isLoading,
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter),
-            backgroundColor = CoolWhite,
-            contentColor = ProfessionalBlue
+            backgroundColor = SystemBackground,
+            contentColor = SystemBlue
         )
     }
 }
@@ -104,14 +103,14 @@ fun EmptyState(isLoading: Boolean) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             val infiniteTransition = rememberInfiniteTransition(label = "float")
             val floatOffset by infiniteTransition.animateFloat(
                 initialValue = 0f,
-                targetValue = 6f,
+                targetValue = 8f,
                 animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = EaseInOutSine),
+                    animation = tween(2500, easing = FastOutSlowInEasing),
                     repeatMode = RepeatMode.Reverse
                 ),
                 label = "float"
@@ -119,21 +118,22 @@ fun EmptyState(isLoading: Boolean) {
 
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(88.dp)
                     .offset(y = floatOffset.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = LightBlue.copy(alpha = 0.5f),
-                    modifier = Modifier.fillMaxSize()
+                    color = BlueLight,
+                    modifier = Modifier.fillMaxSize(),
+                    shadowElevation = 0.dp
                 ) {}
 
                 Icon(
                     imageVector = if (isLoading) Icons.Default.CheckCircle else Icons.Outlined.Inventory2,
                     contentDescription = null,
-                    tint = ProfessionalBlue,
-                    modifier = Modifier.size(40.dp)
+                    tint = SystemBlue,
+                    modifier = Modifier.size(36.dp)
                 )
             }
 
@@ -143,15 +143,15 @@ fun EmptyState(isLoading: Boolean) {
             ) {
                 Text(
                     text = if (isLoading) "正在同步..." else "暂无快递",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = TextPrimary,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Label,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Text(
-                    text = if (isLoading) "正在获取最新数据" else "收到取件短信后会自动显示",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary,
+                    text = if (isLoading) "正在获取最新数据" else "收到取件短信后会自动显示在此",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SecondaryLabel,
                     textAlign = TextAlign.Center
                 )
             }
@@ -173,20 +173,20 @@ fun PackageItem(
     val isPickedUp = packageItem.status == PackageStatus.PICKED_UP
 
     LaunchedEffect(Unit) {
-        delay(50)
+        delay(60)
         isVisible = true
     }
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(animationSpec = tween(300)) +
-                expandVertically(animationSpec = tween(300)),
-        exit = fadeOut() + shrinkVertically()
+        enter = fadeIn(tween(350)) +
+                slideInVertically(tween(350)) { it / 4 },
+        exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .alpha(if (isPickedUp) 0.75f else 1f)
+                .alpha(if (isPickedUp) 0.72f else 1f)
                 .pointerInput(packageItem.status) {
                     detectTapGestures(
                         onLongPress = {
@@ -205,402 +205,377 @@ fun PackageItem(
                         }
                     )
                 },
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = CardBackground
+                containerColor = SystemBackground
             ),
             elevation = CardDefaults.cardElevation(
-                defaultElevation = if (isPickedUp) 0.5.dp else 1.5.dp
+                defaultElevation = 0.dp
             )
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
             ) {
+                // 顶部：平台 + 柜号 + 状态
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            if (isPickedUp) SuccessLight.copy(alpha = 0.4f) else LightBlue.copy(alpha = 0.25f)
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.weight(1f)
                     ) {
-                        // 平台标识（菜鸟驿站特殊显示）
                         val platformLabel = packageItem.platform
                         if (!platformLabel.isNullOrBlank()) {
-                            PlatformBadge(
+                            IosPlatformBadge(
                                 platform = platformLabel,
                                 isPickedUp = isPickedUp
                             )
                         }
 
-                        // 柜号/驿站标识
                         val lockerLabel = if (packageItem.lockerNumber == "驿站") {
                             "驿站取件"
                         } else {
                             "${packageItem.lockerNumber}号柜"
                         }
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (isPickedUp) SuccessGreen.copy(alpha = 0.12f) else ProfessionalBlue.copy(alpha = 0.1f)
-                        ) {
-                            Text(
-                                text = lockerLabel,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = if (isPickedUp) SuccessGreen else ProfessionalBlue,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-
                         Text(
-                            text = packageItem.location,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
-                    StatusBadge(isPickedUp = isPickedUp)
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Column {
-                            Text(
-                                text = "取件码",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = TextTertiary
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = packageItem.pickupCode,
-                                style = MaterialTheme.typography.titleLarge,
-                                color = if (isPickedUp) TextTertiary else TextPrimary,
-                                fontWeight = FontWeight.Bold,
-                                textDecoration = if (isPickedUp) TextDecoration.LineThrough else null
-                            )
-                        }
-
-                        Column(
-                            horizontalAlignment = Alignment.End
-                        ) {
-                            Text(
-                                text = "送达",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = TextTertiary
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = formatDate(packageItem.receiveTime),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextSecondary
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-                    HorizontalDivider(color = CardBorder, thickness = 0.5.dp)
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isPickedUp && packageItem.pickupTime != null) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = null,
-                                    tint = SuccessGreen,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Text(
-                                    text = "已取 ${formatPickupTime(packageItem.pickupTime!!)}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = SuccessGreen
-                                )
-                            }
-                        } else {
-                            Text(
-                                text = "长按或点击确认取件",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextTertiary
-                            )
-                        }
-
-                        if (!isPickedUp) {
-                            Button(
-                                onClick = {
-                                    if (confirmBeforeSwipe) {
-                                        showConfirmDialog = true
-                                    } else {
-                                        onPickedUp(packageItem)
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = ProfessionalBlue,
-                                    contentColor = TextInverse
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                                elevation = ButtonDefaults.buttonElevation(
-                                    defaultElevation = 2.dp,
-                                    pressedElevation = 1.dp
-                                ),
-                                modifier = Modifier.height(32.dp)
-                            ) {
-                                Text(
-                                    text = "确认取件",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TextInverse
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showConfirmDialog) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDialog = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Outlined.Inventory2,
-                    contentDescription = null,
-                    tint = ProfessionalBlue,
-                    modifier = Modifier.size(28.dp)
-                )
-            },
-            title = {
-                Text(
-                    text = "确认取件",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-            },
-            text = {
-                Column {
-                    if (!packageItem.platform.isNullOrBlank()) {
-                        Text(
-                            text = "来源：${packageItem.platform}",
+                            text = lockerLabel,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary,
-                            fontWeight = FontWeight.Medium
+                            color = if (isPickedUp) TertiaryLabel else SecondaryLabel,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
                     }
-                    val lockerText = if (packageItem.lockerNumber == "驿站") "驿站取件" else "${packageItem.lockerNumber}号柜"
-                    Text(
-                        text = "柜号：$lockerText",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
-                    )
+
+                    IosStatusBadge(isPickedUp = isPickedUp)
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // 分隔线
+                HorizontalDivider(
+                    color = Separator,
+                    thickness = 0.5.dp
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // 取件码
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Column {
+                        Text(
+                            text = "取件码",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TertiaryLabel,
+                            fontSize = 11.sp
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = packageItem.pickupCode,
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isPickedUp) TertiaryLabel else Label,
+                            textDecoration = if (isPickedUp) TextDecoration.LineThrough else null,
+                            fontSize = 22.sp,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+
+                    // 送达时间
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "送达",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = TertiaryLabel,
+                            fontSize = 11.sp
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = formatDate(packageItem.receiveTime),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = SecondaryLabel,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                // 位置信息
+                if (packageItem.location.isNotBlank()) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "取件码：${packageItem.pickupCode}",
+                        text = packageItem.location,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "位置：${packageItem.location}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
+                        color = SecondaryLabel,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 12.sp
                     )
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onPickedUp(packageItem)
-                        showConfirmDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ProfessionalBlue
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text("确认取件")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showConfirmDialog = false }
-                ) {
-                    Text("取消", color = TextSecondary)
-                }
-            },
-            shape = RoundedCornerShape(20.dp),
-            containerColor = CardBackground
-        )
-    }
 
-    if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            icon = {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(
-                            VibrantOrange.copy(alpha = 0.1f),
-                            CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        tint = VibrantOrange,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            },
-            title = {
-                Text(
-                    text = "恢复未取件",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
-            },
-            text = {
-                val lockerDesc = if (packageItem.lockerNumber == "驿站") "驿站" else "${packageItem.lockerNumber}号柜"
-                Text(
-                    text = "确定要将${lockerDesc}的快递恢复为未取件状态吗？",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextSecondary,
-                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onResetToPending(packageItem.id)
-                        showResetDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = VibrantOrange,
-                        contentColor = TextInverse
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Text(
-                        text = "恢复",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showResetDialog = false },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                ) {
-                    Text(
-                        text = "取消",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = TextSecondary
-                    )
-                }
-            },
-            shape = RoundedCornerShape(24.dp),
-            containerColor = CardBackground
-        )
-    }
-}
+                Spacer(modifier = Modifier.height(8.dp))
 
-@Composable
-fun PlatformBadge(platform: String, isPickedUp: Boolean) {
-    val (bgColor, textColor) = when {
-        platform.contains("菜鸟") -> Pair(OrangeLight, VibrantOrange)
-        platform.contains("递管家") -> Pair(LightBlue.copy(alpha = 0.5f), ProfessionalBlue)
-        platform.contains("顺丰") -> Pair(SuccessLight, SuccessGreen)
-        else -> Pair(LightBlue.copy(alpha = 0.5f), ProfessionalBlue)
-    }
+                // 底部操作区
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isPickedUp && packageItem.pickupTime != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = SystemGreen,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = "已取 ${formatPickupTime(packageItem.pickupTime!!)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = SystemGreen,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 13.sp
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "轻点取件，长按已取可恢复",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TertiaryLabel,
+                            fontSize = 12.sp
+                        )
+                    }
 
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = if (isPickedUp) bgColor.copy(alpha = 0.5f) else bgColor
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(3.dp)
-        ) {
-            // 菜鸟驿站显示小圆点标记
-            if (platform.contains("菜鸟")) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(VibrantOrange)
-                )
+                    if (!isPickedUp) {
+                        Button(
+                            onClick = {
+                                if (confirmBeforeSwipe) {
+                                    showConfirmDialog = true
+                                } else {
+                                    onPickedUp(packageItem)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SystemBlue,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(20.dp),
+                            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 7.dp),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 0.dp,
+                                pressedElevation = 0.dp
+                            ),
+                            modifier = Modifier.height(34.dp)
+                        ) {
+                            Text(
+                                text = "确认取件",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
             }
-            Text(
-                text = platform.replace("速运", ""),
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isPickedUp) textColor.copy(alpha = 0.6f) else textColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = if (platform.contains("菜鸟")) 11.sp else 10.sp
-            )
+        }
+    }
+
+    // iOS 风格确认对话框
+    if (showConfirmDialog) {
+        val lockerText = if (packageItem.lockerNumber == "驿站") "驿站取件" else "${packageItem.lockerNumber}号柜"
+        IosAlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = "确认取件",
+            message = buildString {
+                if (!packageItem.platform.isNullOrBlank()) {
+                    append("来源：${packageItem.platform}\n")
+                }
+                append("柜号：$lockerText\n")
+                append("取件码：${packageItem.pickupCode}\n")
+                append("位置：${packageItem.location}")
+            },
+            confirmText = "确认取件",
+            onConfirm = {
+                onPickedUp(packageItem)
+                showConfirmDialog = false
+            },
+            confirmColor = SystemBlue,
+            dismissText = "取消"
+        )
+    }
+
+    // iOS 风格恢复对话框
+    if (showResetDialog) {
+        val lockerDesc = if (packageItem.lockerNumber == "驿站") "驿站" else "${packageItem.lockerNumber}号柜"
+        IosAlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = "恢复未取件",
+            message = "确定要将 ${lockerDesc} 的快递\n恢复为「未取件」状态吗？",
+            confirmText = "恢复",
+            onConfirm = {
+                onResetToPending(packageItem.id)
+                showResetDialog = false
+            },
+            confirmColor = SystemOrange,
+            dismissText = "取消"
+        )
+    }
+}
+
+@Composable
+private fun IosAlertDialog(
+    onDismissRequest: () -> Unit,
+    title: String,
+    message: String,
+    confirmText: String,
+    onConfirm: () -> Unit,
+    confirmColor: Color,
+    dismissText: String
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest
+    ) {
+        Surface(
+            shape = RoundedCornerShape(14.dp),
+            color = SystemBackground,
+            shadowElevation = 0.dp
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(Modifier.height(20.dp))
+
+                // 标题
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                // 内容
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SecondaryLabel,
+                    textAlign = TextAlign.Center,
+                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                Spacer(Modifier.height(20.dp))
+
+                // 分隔线
+                HorizontalDivider(color = Separator, thickness = 0.5.dp)
+
+                // 按钮区域 - iOS 风格水平并排
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TextButton(
+                        onClick = onDismissRequest,
+                        modifier = Modifier.weight(1f).height(44.dp),
+                        shape = RoundedCornerShape(0.dp)
+                    ) {
+                        Text(
+                            text = dismissText,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = SystemBlue
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .width(0.5.dp)
+                            .fillMaxHeight()
+                            .background(Separator)
+                    )
+
+                    TextButton(
+                        onClick = onConfirm,
+                        modifier = Modifier.weight(1f).height(44.dp),
+                        shape = RoundedCornerShape(0.dp)
+                    ) {
+                        Text(
+                            text = confirmText,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = confirmColor
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun StatusBadge(isPickedUp: Boolean) {
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = if (isPickedUp) SuccessLight else OrangeLight
+fun IosPlatformBadge(platform: String, isPickedUp: Boolean) {
+    val (bgColor, textColor, dotColor) = when {
+        platform.contains("菜鸟") -> Triple(OrangeLight, SystemOrange, SystemOrange)
+        platform.contains("递管家") -> Triple(BlueLight, SystemBlue, SystemBlue)
+        platform.contains("顺丰") -> Triple(GreenLight, SystemGreen, SystemGreen)
+        else -> Triple(BlueLight, SystemBlue, SystemBlue)
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Icon(
-                imageVector = if (isPickedUp) Icons.Default.CheckCircle else Icons.Outlined.Inventory2,
-                contentDescription = null,
-                tint = if (isPickedUp) SuccessGreen else VibrantOrange,
-                modifier = Modifier.size(12.dp)
-            )
-            Text(
-                text = if (isPickedUp) "已取" else "待取",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isPickedUp) SuccessGreen else VibrantOrange,
-                fontWeight = FontWeight.Medium
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(CircleShape)
+                .background(if (isPickedUp) dotColor.copy(alpha = 0.4f) else dotColor)
+        )
+        Text(
+            text = platform.replace("速运", ""),
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isPickedUp) textColor.copy(alpha = 0.4f) else textColor,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp
+        )
+    }
+}
+
+@Composable
+fun IosStatusBadge(isPickedUp: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(
+            imageVector = if (isPickedUp) Icons.Default.CheckCircle else Icons.Outlined.Inventory2,
+            contentDescription = null,
+            tint = if (isPickedUp) SystemGreen else SystemOrange,
+            modifier = Modifier.size(14.dp)
+        )
+        Text(
+            text = if (isPickedUp) "已取" else "待取",
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isPickedUp) SystemGreen else SystemOrange,
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp
+        )
     }
 }
 
@@ -608,7 +583,6 @@ fun formatDate(timestamp: Long): String {
     val now = Calendar.getInstance()
     val date = Calendar.getInstance().apply { timeInMillis = timestamp }
 
-    // 重置时分秒，只比较日期
     now.set(Calendar.HOUR_OF_DAY, 0)
     now.set(Calendar.MINUTE, 0)
     now.set(Calendar.SECOND, 0)

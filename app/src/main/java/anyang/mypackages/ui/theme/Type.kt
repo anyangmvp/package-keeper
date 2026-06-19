@@ -6,139 +6,144 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+// ============================================
+// Apple iOS 风格字体系统
+// 基于 SF Pro Display / SF Pro Text 的视觉层级
+// ============================================
+
 val Typography = Typography(
-    headlineLarge = TextStyle(
+    // iOS Large Title
+    displayLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
+        fontSize = 34.sp,
+        lineHeight = 41.sp,
+        letterSpacing = 0.37.sp
+    ),
+
+    // iOS Title 1
+    displayMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = (-0.5).sp,
-        color = TextPrimary
+        lineHeight = 34.sp,
+        letterSpacing = 0.36.sp
     ),
 
-    headlineMedium = TextStyle(
+    // iOS Title 2
+    displaySmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
-        letterSpacing = 0.sp,
-        color = TextPrimary
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.35.sp
     ),
 
+    // iOS Title 3
+    headlineLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
+        lineHeight = 25.sp,
+        letterSpacing = 0.38.sp
+    ),
+
+    // iOS Headline (Semi-Bold)
+    headlineMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
+        letterSpacing = (-0.41).sp
+    ),
+
+    // iOS Headline (Medium)
     headlineSmall = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp,
-        color = TextPrimary
+        fontWeight = FontWeight.Medium,
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
+        letterSpacing = (-0.41).sp
     ),
 
+    // iOS Body (17pt)
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 26.sp,
-        letterSpacing = 0.sp,
-        color = TextPrimary
+        fontWeight = FontWeight.Normal,
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
+        letterSpacing = (-0.41).sp
     ),
 
+    // iOS Callout
     titleMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.15.sp,
-        color = TextPrimary
+        lineHeight = 21.sp,
+        letterSpacing = (-0.32).sp
     ),
 
+    // iOS Subheadline
     titleSmall = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
         lineHeight = 20.sp,
-        letterSpacing = 0.1.sp,
-        color = TextSecondary
+        letterSpacing = (-0.24).sp
     ),
 
+    // iOS Body (Standard)
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp,
-        color = TextPrimary
+        fontSize = 17.sp,
+        lineHeight = 22.sp,
+        letterSpacing = (-0.41).sp
     ),
 
+    // iOS Footnote
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.25.sp,
-        color = TextSecondary
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = (-0.08).sp
     ),
 
+    // iOS Caption 1
     bodySmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        letterSpacing = 0.4.sp,
-        color = TextTertiary
+        letterSpacing = 0.sp
     ),
 
+    // iOS Callout (Semi-Bold)
     labelLarge = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.1.sp,
-        color = TextPrimary
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp,
+        lineHeight = 21.sp,
+        letterSpacing = (-0.32).sp
     ),
 
+    // iOS Footnote (Semi-Bold)
     labelMedium = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp,
-        color = TextSecondary
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        letterSpacing = (-0.08).sp
     ),
 
+    // iOS Caption 2
     labelSmall = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp,
-        color = TextTertiary
-    ),
-
-    displayLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 48.sp,
-        lineHeight = 56.sp,
-        letterSpacing = (-0.25).sp,
-        color = TextPrimary
-    ),
-
-    displayMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 36.sp,
-        lineHeight = 44.sp,
-        letterSpacing = 0.sp,
-        color = TextPrimary
-    ),
-
-    displaySmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
-        letterSpacing = 0.sp,
-        color = TextPrimary
-    ),
+        lineHeight = 13.sp,
+        letterSpacing = 0.07.sp
+    )
 )

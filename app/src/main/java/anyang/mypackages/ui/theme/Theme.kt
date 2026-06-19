@@ -13,63 +13,65 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = ProfessionalBlue,
-    secondary = ModernTeal,
-    tertiary = VibrantOrange,
-    background = CoolWhite,
-    surface = CardBackground,
-    surfaceVariant = SoftGray,
-    onPrimary = TextInverse,
-    onSecondary = TextInverse,
-    onTertiary = TextInverse,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
-    onSurfaceVariant = TextSecondary,
-    error = ErrorRed,
-    onError = TextInverse,
-    outline = CardBorder,
-    primaryContainer = LightBlue,
-    onPrimaryContainer = DeepBlue,
-    secondaryContainer = TealLight,
-    onSecondaryContainer = ModernTeal,
+    primary = SystemBlue,
+    onPrimary = Color.White,
+    primaryContainer = BlueLight,
+    onPrimaryContainer = SystemBlue,
+    secondary = SystemGreen,
+    onSecondary = Color.White,
+    secondaryContainer = GreenLight,
+    onSecondaryContainer = SystemGreen,
+    tertiary = SystemOrange,
+    onTertiary = Color.White,
     tertiaryContainer = OrangeLight,
-    onTertiaryContainer = VibrantOrange
+    onTertiaryContainer = SystemOrange,
+    error = SystemRed,
+    onError = Color.White,
+    errorContainer = RedLight,
+    onErrorContainer = SystemRed,
+    background = SystemGroupedBackground,
+    onBackground = Label,
+    surface = SystemBackground,
+    onSurface = Label,
+    surfaceVariant = SystemGroupedBackground,
+    onSurfaceVariant = SecondaryLabel,
+    outline = OpaqueSeparator,
+    outlineVariant = Separator
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = LightBlue,
-    secondary = TealLight,
-    tertiary = WarmOrange,
-    background = Color(0xFF0F172A),
-    surface = Color(0xFF1E293B),
-    surfaceVariant = Color(0xFF334155),
-    onPrimary = DeepBlue,
-    onSecondary = ModernTeal,
-    onTertiary = Color(0xFF7C2D12),
-    onBackground = Color(0xFFF1F5F9),
-    onSurface = Color(0xFFF1F5F9),
-    onSurfaceVariant = Color(0xFFCBD5E1),
-    error = Color(0xFFFCA5A5),
-    onError = Color(0xFF7F1D1D),
-    outline = Color(0xFF475569),
-    primaryContainer = DeepBlue,
-    onPrimaryContainer = LightBlue,
-    secondaryContainer = ModernTeal,
-    onSecondaryContainer = TealLight,
-    tertiaryContainer = Color(0xFF7C2D12),
-    onTertiaryContainer = OrangeLight
+    primary = Color(0xFF0A84FF),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF0040DD),
+    onPrimaryContainer = Color(0xFFB3D7FF),
+    secondary = Color(0xFF30D158),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFF007A3D),
+    onSecondaryContainer = Color(0xFFA3EBB5),
+    tertiary = Color(0xFFFF9F0A),
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFC44E00),
+    onTertiaryContainer = Color(0xFFFFD7A0),
+    error = Color(0xFFFF453A),
+    onError = Color.White,
+    errorContainer = Color(0xFF930015),
+    onErrorContainer = Color(0xFFFFDAD6),
+    background = Color(0xFF000000),
+    onBackground = Color(0xFFF5F5F7),
+    surface = Color(0xFF1C1C1E),
+    onSurface = Color(0xFFF5F5F7),
+    surfaceVariant = Color(0xFF2C2C2E),
+    onSurfaceVariant = Color(0xFFAEAEB2),
+    outline = Color(0xFF545458),
+    outlineVariant = Color(0xFF38383A)
 )
 
 @Composable
 fun MyPackagesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     val view = LocalView.current
     if (!view.isInEditMode) {
